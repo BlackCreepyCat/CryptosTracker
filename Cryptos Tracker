@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Top Cryptos Tracker 1.0 By Philippe A.</title>
+  <title>Top Cryptos Tracker 1.0 By Creepy Cat.</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
   <style>
@@ -104,33 +104,33 @@
   </style>
 </head>
 <body>
-  <h1>Top Cryptos Tracker 1.0 By Philippe A.</h1>
+  <h1>Top Cryptos Tracker 1.0 By Creepy Cat.</h1>
 
   <div class="controls">
-    <label>Recherche :
-      <input id="search" list="coinSuggestions" type="text" placeholder="Nom ou symbole" aria-label="Rechercher une cryptomonnaie par nom ou symbole"/>
+    <label>Search:
+      <input id="search" list="coinSuggestions" type="text" placeholder="Name or symbol" aria-label="Search for a cryptocurrency by name or symbol"/>
       <datalist id="coinSuggestions"></datalist>
     </label>
-    <button id="searchBtn" aria-label="Lancer la recherche">Rechercher</button>
-    <button id="clearSearchBtn" aria-label="Effacer la recherche">Effacer</button>
-    <label>Durée :
+    <button id="searchBtn" aria-label="Start search">Search</button>
+    <button id="clearSearchBtn" aria-label="Clear search">Clear</button>
+    <label>Period:
       <select id="period">
-        <option value="1h">1 heure</option>
-        <option value="24h" selected>24 heures</option>
-        <option value="7d">7 jours</option>
-        <option value="30d">30 jours</option>
-        <option value="1y">1 an</option>
-        <option value="custom">Personnalisée</option>
+        <option value="1h">1 hour</option>
+        <option value="24h" selected>24 hours</option>
+        <option value="7d">7 days</option>
+        <option value="30d">30 days</option>
+        <option value="1y">1 year</option>
+        <option value="custom">Custom</option>
       </select>
     </label>
     <label id="customPeriod" style="display:none;">
-      Date :
-      <input id="customDate" type="date" aria-label="Sélectionner une date personnalisée"/>
+      Date:
+      <input id="customDate" type="date" aria-label="Select a custom date"/>
     </label>
-    <label>Nombre :
-      <input id="count" type="number" min="1" max="250" value="24" style="width:86px" aria-label="Nombre de cryptomonnaies à afficher"/>
+    <label>Number:
+      <input id="count" type="number" min="1" max="250" value="24" style="width:86px" aria-label="Number of cryptocurrencies to display"/>
     </label>
-    <label>Devise :
+    <label>Currency:
       <select id="currency">
         <option value="usd" selected>USD</option>
         <option value="eur">EUR</option>
@@ -138,69 +138,69 @@
         <option value="eth">ETH</option>
       </select>
     </label>
-    <label>Tri :
+    <label>Sort:
       <select id="sortMode">
-        <option value="performance_pos" selected>Performance positive</option>
-        <option value="performance_neg">Performance négative</option>
-        <option value="name">Nom</option>
-        <option value="price">Prix</option>
-        <option value="market_cap">Capitalisation</option>
+        <option value="performance_pos" selected>Positive performance</option>
+        <option value="performance_neg">Negative performance</option>
+        <option value="name">Name</option>
+        <option value="price">Price</option>
+        <option value="market_cap">Market cap</option>
         <option value="volume">Volume</option>
-        <option value="volatility">Volatilité</option>
+        <option value="volatility">Volatility</option>
       </select>
     </label>
     <label>
-      <input id="showOnlyFavorites" type="checkbox" aria-label="Afficher uniquement les favoris"/> Favoris uniquement
+      <input id="showOnlyFavorites" type="checkbox" aria-label="Show only favorites"/> Favorites only
     </label>
-    <label>Métriques :
-      <label><input type="checkbox" id="showPrice" checked> Prix</label>
-      <label><input type="checkbox" id="showChange" checked> Variation</label>
-      <label><input type="checkbox" id="showMarketCap" checked> Capitalisation</label>
+    <label>Metrics:
+      <label><input type="checkbox" id="showPrice" checked> Price</label>
+      <label><input type="checkbox" id="showChange" checked> Change</label>
+      <label><input type="checkbox" id="showMarketCap" checked> Market cap</label>
       <label><input type="checkbox" id="showVolume" checked> Volume</label>
-      <label><input type="checkbox" id="showVolatility" checked> Volatilité</label>
+      <label><input type="checkbox" id="showVolatility" checked> Volatility</label>
     </label>
-    <button id="refreshBtn" aria-label="Actualiser les données">Actualiser</button>
-    <button id="toggleAuto" aria-label="Activer ou désactiver l'actualisation automatique">Arrêter auto</button>
-    <button id="themeToggle" aria-label="Basculer entre thème clair et sombre">Basculer thème</button>
-    <button id="exportWatchlist" aria-label="Exporter la watchlist">Exporter watchlist</button>
+    <button id="refreshBtn" aria-label="Refresh data">Refresh</button>
+    <button id="toggleAuto" aria-label="Enable or disable auto-refresh">Stop auto</button>
+    <button id="themeToggle" aria-label="Toggle between light and dark theme">Toggle theme</button>
+    <button id="exportWatchlist" aria-label="Export watchlist">Export watchlist</button>
     <label>
-      <input id="importWatchlist" type="file" accept=".json" aria-label="Importer une watchlist"/>
+      <input id="importWatchlist" type="file" accept=".json" aria-label="Import a watchlist"/>
     </label>
     <label>
-      Email pour alertes :
-      <input id="alertEmail" type="email" placeholder="votre@email.com" aria-label="Adresse email pour les alertes"/>
+      Email for alerts:
+      <input id="alertEmail" type="email" placeholder="your@email.com" aria-label="Email address for alerts"/>
     </label>
     <div class="meta">
-      <div>Dernière MAJ : <span id="lastUpdate">—</span></div>
-      <div id="status" style="margin-top:6px;color:#9aa7be;font-size:13px">Statut : prêt</div>
+      <div>Last update: <span id="lastUpdate">—</span></div>
+      <div id="status" style="margin-top:6px;color:#9aa7be;font-size:13px">Status: ready</div>
     </div>
   </div>
 
-  <div id="loadingSpinner"><span class="spinner"></span> Chargement...</div>
+  <div id="loadingSpinner"><span class="spinner"></span> Loading...</div>
   <div id="list" class="grid"></div>
 
   <div id="tradingBotModule" style="display:none;">
-    <h2>Recommandations pour Bot de Trading</h2>
-    <p>Basé sur les cryptos affichées, voici les cryptos les plus performantes pour un bot de trading. Critères : haute volatilité (opportunités de profit), volume élevé (liquidité), performance positive récente.</p>
+    <h2>Trading Bot Recommendations</h2>
+    <p>Based on the displayed cryptocurrencies, here are the top-performing cryptocurrencies for a trading bot. Criteria: high volatility (profit opportunities), high volume (liquidity), recent positive performance.</p>
     <table>
       <thead>
         <tr>
           <th>Crypto</th>
-          <th>Score (sur 10)</th>
-          <th>Volatilité 7j (%)</th>
-          <th>Volume 24h</th>
-          <th>Performance 24h (%)</th>
+          <th>Score (out of 10)</th>
+          <th>7-day Volatility (%)</th>
+          <th>24h Volume</th>
+          <th>24h Performance (%)</th>
         </tr>
       </thead>
       <tbody id="tradingTableBody"></tbody>
     </table>
   </div>
 
-  <footer>Utilise l'API publique CoinGecko — mise à jour auto toutes les 60s.</footer>
+  <footer>Uses CoinGecko public API — auto-updates every 60s.</footer>
 
   <script>
     (async function(){
-      emailjs.init('VOTRE_USER_ID'); // Remplacez par votre User ID EmailJS
+      emailjs.init('VOTRE_USER_ID'); // Replace with your EmailJS User ID
       const els = {
         period: document.getElementById('period'),
         customDate: document.getElementById('customDate'),
@@ -276,9 +276,9 @@
         const volatility = calculateVolatility(c.sparkline_in_7d?.price || []);
         const volume = c.total_volume || 0;
         const change24h = c.price_change_percentage_24h_in_currency || 0;
-        // Score: volatilité normalisée (0-5) + volume normalisé (0-3) + performance positive (0-2)
-        const volScore = Math.min(volatility / 0.1, 5); // Cap à 5
-        const volNorm = Math.min((volume / 1e10), 3); // Normalisé par rapport à un volume élevé
+        // Score: normalized volatility (0-5) + normalized volume (0-3) + positive performance (0-2)
+        const volScore = Math.min(volatility / 0.1, 5); // Cap at 5
+        const volNorm = Math.min((volume / 1e10), 3); // Normalized against high volume
         const perfScore = change24h > 0 ? Math.min(change24h / 10, 2) : 0;
         return Math.round((volScore + volNorm + perfScore) * 10) / 10;
       }
@@ -291,7 +291,7 @@
         els.tradingBotModule.style.display = 'block';
         const vs = els.currency.value;
         const period = els.period.value;
-        // Trier par score descendant, sans limiter à 5
+        // Sort by descending score, without limiting to 5
         const scored = filtered.map(c => ({ ...c, score: calculateTradingScore(c, vs, period) })).sort((a, b) => b.score - a.score);
         els.tradingTableBody.innerHTML = scored.map(c => `
           <tr>
@@ -327,11 +327,11 @@
           );
           const validData = res.filter(c => c.sparkline_in_7d?.price && c.sparkline_in_7d.price.length > 0);
           if (res.length !== validData.length) {
-            console.warn('Certaines données de favoris manquent sparkline_in_7d:', res.filter(c => !c.sparkline_in_7d?.price));
+            console.warn('Some favorite data is missing sparkline_in_7d:', res.filter(c => !c.sparkline_in_7d?.price));
           }
           return validData;
         } catch (err) {
-          console.warn('Erreur lors du fetch des favoris:', err.message);
+          console.warn('Error fetching favorites:', err.message);
           return [];
         }
       }
@@ -356,7 +356,7 @@
           seconds--;
           if (seconds <= 0) seconds = INTERVAL / 1000;
           document.querySelectorAll(".countdown-card").forEach(el => {
-            el.textContent = `Prochain refresh : ${seconds}s`;
+            el.textContent = `Next refresh: ${seconds}s`;
           });
         }, 1000);
       }
@@ -371,7 +371,7 @@
         clearInterval(timerId);
         clearInterval(cardCountdownTimer);
         timerId = null;
-        document.querySelectorAll(".countdown-card").forEach(el => el.textContent = "Auto refresh arrêté");
+        document.querySelectorAll(".countdown-card").forEach(el => el.textContent = "Auto refresh stopped");
       }
 
       async function fetchData() {
@@ -379,7 +379,7 @@
         const count = Math.max(1, Math.min(250, parseInt(els.count.value) || 24));
         const period = els.period.value;
         els.loadingSpinner.style.display = "block";
-        els.status.textContent = "Chargement...";
+        els.status.textContent = "Loading...";
 
         try {
           let data = [];
@@ -416,7 +416,7 @@
           els.lastUpdate.textContent = new Date().toLocaleTimeString();
           els.status.textContent = "OK";
         } catch (err) {
-          els.status.textContent = "Erreur : " + err.message;
+          els.status.textContent = "Error: " + err.message;
         } finally {
           els.loadingSpinner.style.display = "none";
         }
@@ -424,7 +424,7 @@
 
       async function checkAlerts() {
         if (!alertEmail) {
-          els.status.textContent = 'Veuillez entrer une adresse email pour les alertes';
+          els.status.textContent = "Please enter an email address for alerts";
           return;
         }
         const vs = els.currency.value;
@@ -432,10 +432,10 @@
           if (alerts[c.id]) {
             const { min, max } = alerts[c.id];
             if (min && c.current_price < min) {
-              sendEmailAlert(c.name, `sous le seuil de ${min} ${vs.toUpperCase()}`, c.current_price);
+              sendEmailAlert(c.name, `below the threshold of ${min} ${vs.toUpperCase()}`, c.current_price);
             }
             if (max && c.current_price > max) {
-              sendEmailAlert(c.name, `au-dessus du seuil de ${max} ${vs.toUpperCase()}`, c.current_price);
+              sendEmailAlert(c.name, `above the threshold of ${max} ${vs.toUpperCase()}`, c.current_price);
             }
           }
         });
@@ -449,9 +449,9 @@
             message: message,
             current_price: formatPrice(currentPrice, els.currency.value)
           });
-          els.status.textContent = `Email envoyé pour ${coinName}`;
+          els.status.textContent = `Email sent for ${coinName}`;
         } catch (err) {
-          els.status.textContent = `Erreur envoi email : ${err.message}`;
+          els.status.textContent = `Email sending error: ${err.message}`;
         }
       }
 
@@ -485,7 +485,7 @@
         const showOnlyFavorites = els.showOnlyFavorites.checked;
 
         if (searchText.length > 100) {
-          els.status.textContent = "Erreur : recherche trop longue";
+          els.status.textContent = "Error: search query too long";
           return;
         }
 
@@ -518,7 +518,7 @@
                 );
                 filtered.push(...res);
               } catch (e) {
-                console.warn('Erreur lors du fetch de la crypto recherchée:', e.message);
+                console.warn('Error fetching searched crypto:', e.message);
               }
             }
           } else {
@@ -570,20 +570,20 @@
                 <div class="small">${c.symbol.toUpperCase()}</div>
               </div>
               <div class="watchbox">
-                <input type="checkbox" class="watch-toggle" ${watchlist.includes(c.id) ? "checked" : ""} aria-label="Ajouter ${c.name} à la watchlist"/>
+                <input type="checkbox" class="watch-toggle" ${watchlist.includes(c.id) ? "checked" : ""} aria-label="Add ${c.name} to watchlist"/>
               </div>
             </div>
             ${els.showPrice.checked ? `<div class="price">${formatPrice(c.current_price, vs)}</div>` : ""}
             ${els.showChange.checked && period !== "custom" ? `<div class="change ${changeClass}">${(change ?? 0).toFixed(2)}%</div>` : ""}
-            ${els.showMarketCap.checked ? `<div class="small">Capitalisation : ${formatPrice(c.market_cap, vs)}</div>` : ""}
-            ${els.showVolume.checked ? `<div class="small">Volume 24h : ${formatPrice(c.total_volume, vs)}</div>` : ""}
-            ${els.showVolatility.checked && period !== "custom" ? `<div class="small">Volatilité 7j : ${formatVolatility(volatility)}</div>` : ""}
+            ${els.showMarketCap.checked ? `<div class="small">Market cap: ${formatPrice(c.market_cap, vs)}</div>` : ""}
+            ${els.showVolume.checked ? `<div class="small">24h Volume: ${formatPrice(c.total_volume, vs)}</div>` : ""}
+            ${els.showVolatility.checked && period !== "custom" ? `<div class="small">7-day Volatility: ${formatVolatility(volatility)}</div>` : ""}
             <canvas class="sparkline" width="240" height="60"></canvas>
-            <div class="countdown-card">Prochain refresh : —s</div>
+            <div class="countdown-card">Next refresh: —s</div>
             ${watchlist.includes(c.id) ? `
               <div class="small">
-                Alerte min : <input type="number" class="alert-input alert-min" value="${alerts[c.id]?.min || ""}" placeholder="Min ${vs.toUpperCase()}" aria-label="Seuil minimum pour ${c.name}"/>
-                Alerte max : <input type="number" class="alert-input alert-max" value="${alerts[c.id]?.max || ""}" placeholder="Max ${vs.toUpperCase()}" aria-label="Seuil maximum pour ${c.name}"/>
+                Min alert: <input type="number" class="alert-input alert-min" value="${alerts[c.id]?.min || ""}" placeholder="Min ${vs.toUpperCase()}" aria-label="Minimum threshold for ${c.name}"/>
+                Max alert: <input type="number" class="alert-input alert-max" value="${alerts[c.id]?.max || ""}" placeholder="Max ${vs.toUpperCase()}" aria-label="Maximum threshold for ${c.name}"/>
               </div>
             ` : ""}
           `;
@@ -628,7 +628,7 @@
               return new Date(Date.now() - (24 * 60 * 60 * 1000) + (hours * 3600 * 1000)).toLocaleTimeString();
             });
           } else {
-            console.warn(`Aucune donnée sparkline pour ${c.name} (ID: ${c.id})`);
+            console.warn(`No sparkline data for ${c.name} (ID: ${c.id})`);
           }
 
           charts[c.id] = new Chart(ctx, {
@@ -667,8 +667,8 @@
             modal.className = 'modal';
             modal.innerHTML = `
               <div class="modal-content">
-                <button class="modal-close">Fermer</button>
-                <h2>${c.name} - Graphique détaillé</h2>
+                <button class="modal-close">Close</button>
+                <h2>${c.name} - Detailed Chart</h2>
                 <canvas id="detailedChart" width="560" height="300"></canvas>
               </div>
             `;
@@ -748,7 +748,7 @@
             localStorage.setItem("watchlist", JSON.stringify(watchlist));
             await fetchData();
           } catch (err) {
-            els.status.textContent = "Erreur lors de l'importation";
+            els.status.textContent = "Error during import";
           }
         };
         reader.readAsText(file);
@@ -757,7 +757,7 @@
       els.refreshBtn.addEventListener("click", fetchData);
       els.toggleBtn.addEventListener("click", () => {
         auto = !auto;
-        els.toggleBtn.textContent = auto ? "Arrêter auto" : "Relancer auto";
+        els.toggleBtn.textContent = auto ? "Stop auto" : "Restart auto";
         if (auto) startAuto(); else stopAuto();
       });
       els.themeToggle.addEventListener("click", () => {
