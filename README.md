@@ -1,3 +1,6 @@
 Copy the text into an HTML file and run it! It uses Coingecko's free API. Be kind to the refresh...
+This tool allows you to create lists of crypto to watch. Handy for seeing variations. 
+
+I was inspired by cryptobubble, but I wanted something simpler...
 
 <img width="1446" height="994" alt="image" src="https://github.com/user-attachments/assets/0695cb1d-0a72-4e9a-b43b-58054a5ffdcd" />
