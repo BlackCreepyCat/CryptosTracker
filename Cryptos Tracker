@@ -1,0 +1,792 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Top Cryptos Tracker 1.0 By Philippe A.</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+  <style>
+    body { font-family: Inter, Roboto, Arial; margin: 18px; background: var(--bg, #0a1b2e); color: var(--text, #e6eef8); transition: all 0.3s; }
+    :root { --bg: #0a1b2e; --text: #e6eef8; --card-bg: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); --card-border: #ffffff; }
+    body.light { --bg: #f0f0f0; --text: #333; --card-bg: linear-gradient(180deg, rgba(0,0,0,0.05), rgba(0,0,0,0.02)); --card-border: #ffffff; }
+    h1 { margin:0 0 10px; font-size:22px; color:#60a5fa; }
+    .controls { display:flex; gap:10px; flex-wrap:wrap; margin:10px 0 18px; align-items:center; }
+    label { font-size:14px; color:#cbd5e1; }
+    select, input[type="text"], input[type="number"], input[type="date"], input[type="email"] { padding:6px 10px; border-radius:6px; border:1px solid #334155; background:#0b1c33; color:#e6eef8; }
+    body.light select, body.light input[type="text"], body.light input[type="number"], body.light input[type="date"], body.light input[type="email"] { background:#fff; color:#333; border-color:#ccc; }
+    button { padding:8px 12px; border-radius:8px; border:0; cursor:pointer; background:#2563eb; color:white; transition:all .2s; }
+    button:hover { background:#1e40af; }
+    .meta { margin-left:auto; font-size:13px; color:#94a3b8; }
+    .grid { display:grid; gap:10px; grid-template-columns: repeat(auto-fill,minmax(260px,1fr)); }
+    .card {
+      background: var(--card-bg);
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      transition: border-color .3s, box-shadow .3s, background .3s;
+    }
+    .card:hover { box-shadow:0 6px 15px rgba(0,0,0,0.4); }
+    .card.watched {
+      border: 1px solid #facc15;
+      box-shadow: 0 0 12px rgba(250,204,21,0.4);
+      background: var(--card-bg);
+    }
+    .card.above-max {
+      border: 1px solid #16a34a;
+      box-shadow: 0 0 12px rgba(22,163,74,0.4);
+      background: #1a3c34;
+    }
+    .card.below-min {
+      border: 1px solid #ef4444;
+      box-shadow: 0 0 12px rgba(239,68,68,0.4);
+      background: #3f1c1c;
+    }
+    .coin-name { display:flex; align-items:center; gap:10px; font-weight:600; }
+    .coin-name img { width:28px; height:28px; border-radius:50%; }
+    .coin-link { color:#60a5fa; text-decoration:none; transition:color .2s; }
+    .coin-link:hover { color:#93c5fd; text-decoration:underline; }
+    .watchbox { margin-left:auto; display:flex; align-items:center; gap:5px; font-size:13px; color:#cbd5e1; }
+    .price { font-size:16px; margin-top:6px; font-weight:600; }
+    .change { margin-top:8px; font-weight:700; font-size:14px; }
+    .change.positive { color:#16a34a; }
+    .change.positive::after { content: ' ↑'; color: #16a34a; }
+    .change.negative { color:#ef4444; }
+    .change.negative::after { content: ' ↓'; color: #ef4444; }
+    .small { font-size:12px; color:#94a3b8; margin-top:4px; }
+    .countdown-card { font-size:12px; color:#60a5fa; margin-top:4px; }
+    .alert-input { width:100px; margin-top:4px; }
+    footer { margin-top:16px; font-size:13px; color:#94a3b8; text-align:center; }
+    canvas.sparkline { display:block; margin-top:8px; border-radius:6px; background:#0b1c33; }
+    body.light canvas.sparkline { background:#fff; }
+    #loadingSpinner { text-align:center; font-size:14px; color:#60a5fa; display:none; }
+    .spinner { border:4px solid #f3f3f3; border-top:4px solid #2563eb; border-radius:50%; width:24px; height:24px; animation:spin 1s linear infinite; display:inline-block; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: var(--bg);
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 600px;
+      width: 90%;
+      position: relative;
+    }
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    @media (max-width:640px) { .controls { flex-direction:column; align-items:stretch; } .meta { margin-left:0; } }
+    #tradingBotModule { margin-top: 20px; padding: 15px; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--card-border); }
+    #tradingBotModule h2 { color: #60a5fa; margin-bottom: 10px; }
+    #tradingBotModule p { margin-bottom: 10px; }
+    #tradingBotModule table { width: 100%; border-collapse: collapse; }
+    #tradingBotModule th, #tradingBotModule td { padding: 8px; text-align: left; border-bottom: 1px solid #334155; }
+    #tradingBotModule th { background: rgba(255,255,255,0.05); }
+  </style>
+</head>
+<body>
+  <h1>Top Cryptos Tracker 1.0 By Philippe A.</h1>
+
+  <div class="controls">
+    <label>Recherche :
+      <input id="search" list="coinSuggestions" type="text" placeholder="Nom ou symbole" aria-label="Rechercher une cryptomonnaie par nom ou symbole"/>
+      <datalist id="coinSuggestions"></datalist>
+    </label>
+    <button id="searchBtn" aria-label="Lancer la recherche">Rechercher</button>
+    <button id="clearSearchBtn" aria-label="Effacer la recherche">Effacer</button>
+    <label>Durée :
+      <select id="period">
+        <option value="1h">1 heure</option>
+        <option value="24h" selected>24 heures</option>
+        <option value="7d">7 jours</option>
+        <option value="30d">30 jours</option>
+        <option value="1y">1 an</option>
+        <option value="custom">Personnalisée</option>
+      </select>
+    </label>
+    <label id="customPeriod" style="display:none;">
+      Date :
+      <input id="customDate" type="date" aria-label="Sélectionner une date personnalisée"/>
+    </label>
+    <label>Nombre :
+      <input id="count" type="number" min="1" max="250" value="24" style="width:86px" aria-label="Nombre de cryptomonnaies à afficher"/>
+    </label>
+    <label>Devise :
+      <select id="currency">
+        <option value="usd" selected>USD</option>
+        <option value="eur">EUR</option>
+        <option value="btc">BTC</option>
+        <option value="eth">ETH</option>
+      </select>
+    </label>
+    <label>Tri :
+      <select id="sortMode">
+        <option value="performance_pos" selected>Performance positive</option>
+        <option value="performance_neg">Performance négative</option>
+        <option value="name">Nom</option>
+        <option value="price">Prix</option>
+        <option value="market_cap">Capitalisation</option>
+        <option value="volume">Volume</option>
+        <option value="volatility">Volatilité</option>
+      </select>
+    </label>
+    <label>
+      <input id="showOnlyFavorites" type="checkbox" aria-label="Afficher uniquement les favoris"/> Favoris uniquement
+    </label>
+    <label>Métriques :
+      <label><input type="checkbox" id="showPrice" checked> Prix</label>
+      <label><input type="checkbox" id="showChange" checked> Variation</label>
+      <label><input type="checkbox" id="showMarketCap" checked> Capitalisation</label>
+      <label><input type="checkbox" id="showVolume" checked> Volume</label>
+      <label><input type="checkbox" id="showVolatility" checked> Volatilité</label>
+    </label>
+    <button id="refreshBtn" aria-label="Actualiser les données">Actualiser</button>
+    <button id="toggleAuto" aria-label="Activer ou désactiver l'actualisation automatique">Arrêter auto</button>
+    <button id="themeToggle" aria-label="Basculer entre thème clair et sombre">Basculer thème</button>
+    <button id="exportWatchlist" aria-label="Exporter la watchlist">Exporter watchlist</button>
+    <label>
+      <input id="importWatchlist" type="file" accept=".json" aria-label="Importer une watchlist"/>
+    </label>
+    <label>
+      Email pour alertes :
+      <input id="alertEmail" type="email" placeholder="votre@email.com" aria-label="Adresse email pour les alertes"/>
+    </label>
+    <div class="meta">
+      <div>Dernière MAJ : <span id="lastUpdate">—</span></div>
+      <div id="status" style="margin-top:6px;color:#9aa7be;font-size:13px">Statut : prêt</div>
+    </div>
+  </div>
+
+  <div id="loadingSpinner"><span class="spinner"></span> Chargement...</div>
+  <div id="list" class="grid"></div>
+
+  <div id="tradingBotModule" style="display:none;">
+    <h2>Recommandations pour Bot de Trading</h2>
+    <p>Basé sur les cryptos affichées, voici les cryptos les plus performantes pour un bot de trading. Critères : haute volatilité (opportunités de profit), volume élevé (liquidité), performance positive récente.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Crypto</th>
+          <th>Score (sur 10)</th>
+          <th>Volatilité 7j (%)</th>
+          <th>Volume 24h</th>
+          <th>Performance 24h (%)</th>
+        </tr>
+      </thead>
+      <tbody id="tradingTableBody"></tbody>
+    </table>
+  </div>
+
+  <footer>Utilise l'API publique CoinGecko — mise à jour auto toutes les 60s.</footer>
+
+  <script>
+    (async function(){
+      emailjs.init('VOTRE_USER_ID'); // Remplacez par votre User ID EmailJS
+      const els = {
+        period: document.getElementById('period'),
+        customDate: document.getElementById('customDate'),
+        count: document.getElementById('count'),
+        currency: document.getElementById('currency'),
+        sortMode: document.getElementById('sortMode'),
+        list: document.getElementById('list'),
+        lastUpdate: document.getElementById('lastUpdate'),
+        status: document.getElementById('status'),
+        refreshBtn: document.getElementById('refreshBtn'),
+        toggleBtn: document.getElementById('toggleAuto'),
+        search: document.getElementById('search'),
+        searchBtn: document.getElementById('searchBtn'),
+        clearSearchBtn: document.getElementById('clearSearchBtn'),
+        showOnlyFavorites: document.getElementById('showOnlyFavorites'),
+        themeToggle: document.getElementById('themeToggle'),
+        exportWatchlist: document.getElementById('exportWatchlist'),
+        importWatchlist: document.getElementById('importWatchlist'),
+        showPrice: document.getElementById('showPrice'),
+        showChange: document.getElementById('showChange'),
+        showMarketCap: document.getElementById('showMarketCap'),
+        showVolume: document.getElementById('showVolume'),
+        showVolatility: document.getElementById('showVolatility'),
+        loadingSpinner: document.getElementById('loadingSpinner'),
+        coinSuggestions: document.getElementById('coinSuggestions'),
+        customPeriod: document.getElementById('customPeriod'),
+        alertEmail: document.getElementById('alertEmail'),
+        tradingBotModule: document.getElementById('tradingBotModule'),
+        tradingTableBody: document.getElementById('tradingTableBody')
+      };
+
+      const fieldMap = {
+        '1h': 'price_change_percentage_1h_in_currency',
+        '24h': 'price_change_percentage_24h_in_currency',
+        '7d': 'price_change_percentage_7d_in_currency',
+        '30d': 'price_change_percentage_30d_in_currency',
+        '1y': 'price_change_percentage_1y_in_currency',
+        'custom': 'custom'
+      };
+
+      let watchlist = JSON.parse(localStorage.getItem("watchlist") || "[]");
+      let alerts = JSON.parse(localStorage.getItem("alerts") || "{}");
+      let alertEmail = localStorage.getItem('alertEmail') || '';
+      let auto = true;
+      let timerId = null;
+      const INTERVAL = 60000;
+      let currentData = [];
+      let allCoinsList = null;
+      let cardCountdownTimer = null;
+      let charts = {};
+      let theme = localStorage.getItem("theme") || "dark";
+      if (theme === "light") document.body.classList.add("light");
+
+      els.alertEmail.value = alertEmail;
+      els.alertEmail.addEventListener('change', () => {
+        alertEmail = els.alertEmail.value;
+        localStorage.setItem('alertEmail', alertEmail);
+      });
+
+      function calculateVolatility(prices) {
+        if (!prices || prices.length < 2) return 0;
+        const mean = prices.reduce((sum, p) => sum + p, 0) / prices.length;
+        const variance = prices.reduce((sum, p) => sum + Math.pow(p - mean, 2), 0) / prices.length;
+        return Math.sqrt(variance);
+      }
+
+      function formatVolatility(vol) {
+        return vol.toFixed(4) + '%';
+      }
+
+      function calculateTradingScore(c, vs, period) {
+        if (period === 'custom') return 0;
+        const volatility = calculateVolatility(c.sparkline_in_7d?.price || []);
+        const volume = c.total_volume || 0;
+        const change24h = c.price_change_percentage_24h_in_currency || 0;
+        // Score: volatilité normalisée (0-5) + volume normalisé (0-3) + performance positive (0-2)
+        const volScore = Math.min(volatility / 0.1, 5); // Cap à 5
+        const volNorm = Math.min((volume / 1e10), 3); // Normalisé par rapport à un volume élevé
+        const perfScore = change24h > 0 ? Math.min(change24h / 10, 2) : 0;
+        return Math.round((volScore + volNorm + perfScore) * 10) / 10;
+      }
+
+      function renderTradingBotModule(filtered) {
+        if (filtered.length === 0) {
+          els.tradingBotModule.style.display = 'none';
+          return;
+        }
+        els.tradingBotModule.style.display = 'block';
+        const vs = els.currency.value;
+        const period = els.period.value;
+        // Trier par score descendant, sans limiter à 5
+        const scored = filtered.map(c => ({ ...c, score: calculateTradingScore(c, vs, period) })).sort((a, b) => b.score - a.score);
+        els.tradingTableBody.innerHTML = scored.map(c => `
+          <tr>
+            <td>${c.name} (${c.symbol.toUpperCase()})</td>
+            <td>${c.score}</td>
+            <td>${formatVolatility(calculateVolatility(c.sparkline_in_7d?.price || []))}</td>
+            <td>${formatPrice(c.total_volume, vs)}</td>
+            <td>${c.price_change_percentage_24h_in_currency?.toFixed(2) || 0}%</td>
+          </tr>
+        `).join('');
+      }
+
+      async function fetchAllCoinsList() {
+        const cached = localStorage.getItem("allCoinsList");
+        const cacheTime = localStorage.getItem("allCoinsListTime");
+        const now = Date.now();
+        if (cached && cacheTime && now - cacheTime < 24 * 60 * 60 * 1000) {
+          allCoinsList = JSON.parse(cached);
+          return allCoinsList;
+        }
+        const res = await fetch('https://api.coingecko.com/api/v3/coins/list');
+        allCoinsList = await res.json();
+        localStorage.setItem("allCoinsList", JSON.stringify(allCoinsList));
+        localStorage.setItem("allCoinsListTime", now);
+        return allCoinsList;
+      }
+
+      async function fetchMissingFavorites(missingIds, vs, period) {
+        if (!missingIds.length) return [];
+        try {
+          const res = await fetchWithRetry(
+            `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${vs}&ids=${missingIds.join(',')}&sparkline=true&price_change_percentage=${period}&market_cap=true&total_volume=true`
+          );
+          const validData = res.filter(c => c.sparkline_in_7d?.price && c.sparkline_in_7d.price.length > 0);
+          if (res.length !== validData.length) {
+            console.warn('Certaines données de favoris manquent sparkline_in_7d:', res.filter(c => !c.sparkline_in_7d?.price));
+          }
+          return validData;
+        } catch (err) {
+          console.warn('Erreur lors du fetch des favoris:', err.message);
+          return [];
+        }
+      }
+
+      async function fetchWithRetry(url, maxRetries = 3, delay = 1000) {
+        for (let i = 0; i < maxRetries; i++) {
+          try {
+            const res = await fetch(url);
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            return await res.json();
+          } catch (err) {
+            if (i === maxRetries - 1) throw err;
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
+        }
+      }
+
+      function startCardCountdown() {
+        clearInterval(cardCountdownTimer);
+        let seconds = INTERVAL / 1000;
+        cardCountdownTimer = setInterval(() => {
+          seconds--;
+          if (seconds <= 0) seconds = INTERVAL / 1000;
+          document.querySelectorAll(".countdown-card").forEach(el => {
+            el.textContent = `Prochain refresh : ${seconds}s`;
+          });
+        }, 1000);
+      }
+
+      function startAuto() {
+        if (timerId) clearInterval(timerId);
+        timerId = setInterval(fetchData, INTERVAL);
+        startCardCountdown();
+      }
+
+      function stopAuto() {
+        clearInterval(timerId);
+        clearInterval(cardCountdownTimer);
+        timerId = null;
+        document.querySelectorAll(".countdown-card").forEach(el => el.textContent = "Auto refresh arrêté");
+      }
+
+      async function fetchData() {
+        const vs = els.currency.value;
+        const count = Math.max(1, Math.min(250, parseInt(els.count.value) || 24));
+        const period = els.period.value;
+        els.loadingSpinner.style.display = "block";
+        els.status.textContent = "Chargement...";
+
+        try {
+          let data = [];
+          if (period === "custom" && els.customDate.value) {
+            const date = els.customDate.value;
+            const ids = watchlist.length ? watchlist : (await fetchAllCoinsList()).slice(0, count).map(c => c.id);
+            for (const id of ids) {
+              const res = await fetchWithRetry(
+                `https://api.coingecko.com/api/v3/coins/${id}/history?date=${new Date(date).toLocaleDateString('en-GB').replace(/\//g, '-')}&localization=false`
+              );
+              if (res && res.market_data) {
+                data.push({
+                  id,
+                  name: res.name,
+                  symbol: res.symbol,
+                  image: res.image?.thumb,
+                  current_price: res.market_data.current_price[vs] || 0,
+                  market_cap: res.market_data.market_cap[vs] || 0,
+                  total_volume: res.market_data.total_volume[vs] || 0
+                });
+              }
+            }
+          } else {
+            const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${vs}&order=market_cap_desc&per_page=${count}&page=1&sparkline=true&price_change_percentage=${period}&market_cap=true&total_volume=true`;
+            data = await fetchWithRetry(url);
+            const currentIds = data.map(c => c.id);
+            const missingFavorites = watchlist.filter(id => !currentIds.includes(id));
+            const favoriteData = await fetchMissingFavorites(missingFavorites, vs, period);
+            data = [...data, ...favoriteData];
+          }
+          currentData = data;
+          checkAlerts();
+          render();
+          els.lastUpdate.textContent = new Date().toLocaleTimeString();
+          els.status.textContent = "OK";
+        } catch (err) {
+          els.status.textContent = "Erreur : " + err.message;
+        } finally {
+          els.loadingSpinner.style.display = "none";
+        }
+      }
+
+      async function checkAlerts() {
+        if (!alertEmail) {
+          els.status.textContent = 'Veuillez entrer une adresse email pour les alertes';
+          return;
+        }
+        const vs = els.currency.value;
+        currentData.forEach(c => {
+          if (alerts[c.id]) {
+            const { min, max } = alerts[c.id];
+            if (min && c.current_price < min) {
+              sendEmailAlert(c.name, `sous le seuil de ${min} ${vs.toUpperCase()}`, c.current_price);
+            }
+            if (max && c.current_price > max) {
+              sendEmailAlert(c.name, `au-dessus du seuil de ${max} ${vs.toUpperCase()}`, c.current_price);
+            }
+          }
+        });
+      }
+
+      async function sendEmailAlert(coinName, message, currentPrice) {
+        try {
+          await emailjs.send('VOTRE_SERVICE_ID', 'VOTRE_TEMPLATE_ID', {
+            to_email: alertEmail,
+            coin_name: coinName,
+            message: message,
+            current_price: formatPrice(currentPrice, els.currency.value)
+          });
+          els.status.textContent = `Email envoyé pour ${coinName}`;
+        } catch (err) {
+          els.status.textContent = `Erreur envoi email : ${err.message}`;
+        }
+      }
+
+      async function updateSuggestions() {
+        const searchText = els.search.value.trim().toLowerCase();
+        if (!searchText) {
+          els.coinSuggestions.innerHTML = "";
+          return;
+        }
+        const allCoins = await fetchAllCoinsList();
+        const matches = allCoins
+          .filter(c => c.name.toLowerCase().includes(searchText) || c.symbol.toLowerCase().includes(searchText))
+          .slice(0, 5);
+        els.coinSuggestions.innerHTML = matches.map(c => `<option value="${c.name}">${c.name} (${c.symbol.toUpperCase()})</option>`).join("");
+      }
+
+      function debounce(fn, delay) {
+        let timeout;
+        return (...args) => {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => fn(...args), delay);
+        };
+      }
+
+      async function render() {
+        const period = els.period.value;
+        const vs = els.currency.value;
+        const field = fieldMap[period];
+        const mode = els.sortMode.value;
+        const searchText = els.search.value.trim().toLowerCase();
+        const showOnlyFavorites = els.showOnlyFavorites.checked;
+
+        if (searchText.length > 100) {
+          els.status.textContent = "Erreur : recherche trop longue";
+          return;
+        }
+
+        Object.keys(charts).forEach(id => {
+          charts[id].destroy();
+          delete charts[id];
+        });
+        charts = {};
+
+        const currentIds = currentData.map(c => c.id);
+        const missingFavorites = watchlist.filter(id => !currentIds.includes(id));
+        const favoriteData = period !== "custom" ? await fetchMissingFavorites(missingFavorites, vs, period) : [];
+        let arr = [...currentData, ...favoriteData];
+        let filtered = showOnlyFavorites ? arr.filter(c => watchlist.includes(c.id)) : arr;
+
+        if (searchText && !showOnlyFavorites) {
+          const allCoins = await fetchAllCoinsList();
+          const searchCoin = allCoins.find(
+            c =>
+              c.symbol.toLowerCase() === searchText ||
+              c.id.toLowerCase() === searchText ||
+              c.name.toLowerCase() === searchText
+          );
+          if (searchCoin) {
+            filtered = arr.filter(c => c.id === searchCoin.id || watchlist.includes(c.id));
+            if (!arr.some(c => c.id === searchCoin.id) && period !== "custom") {
+              try {
+                const res = await fetchWithRetry(
+                  `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${vs}&ids=${searchCoin.id}&sparkline=true&price_change_percentage=${period}&market_cap=true&total_volume=true`
+                );
+                filtered.push(...res);
+              } catch (e) {
+                console.warn('Erreur lors du fetch de la crypto recherchée:', e.message);
+              }
+            }
+          } else {
+            filtered = filtered.filter(c => watchlist.includes(c.id));
+          }
+        }
+
+        const modeMap = {
+          performance_pos: (a, b) => (b[field] || -Infinity) - (a[field] || -Infinity),
+          performance_neg: (a, b) => (a[field] || Infinity) - (b[field] || Infinity),
+          name: (a, b) => a.name.localeCompare(b.name),
+          price: (a, b) => (b.current_price || 0) - (a.current_price || 0),
+          market_cap: (a, b) => (b.market_cap || 0) - (a.market_cap || 0),
+          volume: (a, b) => (b.total_volume || 0) - (a.total_volume || 0),
+          volatility: (a, b) => calculateVolatility(b.sparkline_in_7d?.price) - calculateVolatility(a.sparkline_in_7d?.price)
+        };
+        filtered.sort(modeMap[mode] || (() => 0));
+
+        els.list.innerHTML = "";
+        filtered.forEach((c, index) => {
+          const card = document.createElement("div");
+          card.className = "card";
+
+          if (watchlist.includes(c.id)) {
+            const alert = alerts[c.id];
+            if (alert) {
+              if (alert.max && c.current_price > alert.max) {
+                card.classList.add("above-max");
+              } else if (alert.min && c.current_price < alert.min) {
+                card.classList.add("below-min");
+              } else {
+                card.classList.add("watched");
+              }
+            } else {
+                card.classList.add("watched");
+            }
+          }
+
+          const change = period !== "custom" ? c[field] : null;
+          const changeClass = typeof change === 'number' ? (change >= 0 ? "positive" : "negative") : "";
+          const cmcUrl = `https://coinmarketcap.com/currencies/${c.id.toLowerCase()}/`;
+          const volatility = period !== "custom" ? calculateVolatility(c.sparkline_in_7d?.price) : 0;
+
+          card.innerHTML = `
+            <div class="coin-name">
+              <img src="${c.image}" alt="${c.name}" />
+              <div>
+                <a href="${cmcUrl}" class="coin-link" target="_blank">${c.name} (${c.market_cap_rank || 'N/A'})</a>
+                <div class="small">${c.symbol.toUpperCase()}</div>
+              </div>
+              <div class="watchbox">
+                <input type="checkbox" class="watch-toggle" ${watchlist.includes(c.id) ? "checked" : ""} aria-label="Ajouter ${c.name} à la watchlist"/>
+              </div>
+            </div>
+            ${els.showPrice.checked ? `<div class="price">${formatPrice(c.current_price, vs)}</div>` : ""}
+            ${els.showChange.checked && period !== "custom" ? `<div class="change ${changeClass}">${(change ?? 0).toFixed(2)}%</div>` : ""}
+            ${els.showMarketCap.checked ? `<div class="small">Capitalisation : ${formatPrice(c.market_cap, vs)}</div>` : ""}
+            ${els.showVolume.checked ? `<div class="small">Volume 24h : ${formatPrice(c.total_volume, vs)}</div>` : ""}
+            ${els.showVolatility.checked && period !== "custom" ? `<div class="small">Volatilité 7j : ${formatVolatility(volatility)}</div>` : ""}
+            <canvas class="sparkline" width="240" height="60"></canvas>
+            <div class="countdown-card">Prochain refresh : —s</div>
+            ${watchlist.includes(c.id) ? `
+              <div class="small">
+                Alerte min : <input type="number" class="alert-input alert-min" value="${alerts[c.id]?.min || ""}" placeholder="Min ${vs.toUpperCase()}" aria-label="Seuil minimum pour ${c.name}"/>
+                Alerte max : <input type="number" class="alert-input alert-max" value="${alerts[c.id]?.max || ""}" placeholder="Max ${vs.toUpperCase()}" aria-label="Seuil maximum pour ${c.name}"/>
+              </div>
+            ` : ""}
+          `;
+
+          card.querySelector(".watch-toggle")?.addEventListener("change", e => {
+            if (e.target.checked) {
+              if (!watchlist.includes(c.id)) watchlist.push(c.id);
+            } else {
+              watchlist = watchlist.filter(id => id !== c.id);
+              delete alerts[c.id];
+            }
+            localStorage.setItem("watchlist", JSON.stringify(watchlist));
+            localStorage.setItem("alerts", JSON.stringify(alerts));
+            render();
+          });
+
+          if (watchlist.includes(c.id)) {
+            card.querySelector(".alert-min")?.addEventListener("change", e => {
+              alerts[c.id] = { ...alerts[c.id], min: parseFloat(e.target.value) || undefined };
+              localStorage.setItem("alerts", JSON.stringify(alerts));
+              render();
+            });
+            card.querySelector(".alert-max")?.addEventListener("change", e => {
+              alerts[c.id] = { ...alerts[c.id], max: parseFloat(e.target.value) || undefined };
+              localStorage.setItem("alerts", JSON.stringify(alerts));
+              render();
+            });
+          }
+
+          els.list.appendChild(card);
+
+          const canvas = card.querySelector(".sparkline");
+          const ctx = canvas.getContext("2d");
+          let sparkData = [];
+          let sparkLabels = [];
+          if (c.sparkline_in_7d?.price && period !== "custom") {
+            const totalPoints = c.sparkline_in_7d.price.length;
+            const pointsPerDay = Math.floor(totalPoints / 7);
+            sparkData = c.sparkline_in_7d.price.slice(-pointsPerDay);
+            sparkLabels = sparkData.map((_, i) => {
+              const hours = Math.floor((i / pointsPerDay) * 24);
+              return new Date(Date.now() - (24 * 60 * 60 * 1000) + (hours * 3600 * 1000)).toLocaleTimeString();
+            });
+          } else {
+            console.warn(`Aucune donnée sparkline pour ${c.name} (ID: ${c.id})`);
+          }
+
+          charts[c.id] = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: sparkLabels,
+              datasets: [{
+                data: sparkData.length ? sparkData : [],
+                borderColor: (c.price_change_percentage_24h >= 0) ? '#16a34a' : '#ef4444',
+                borderWidth: 2,
+                fill: false,
+                pointRadius: 2,
+                pointHoverRadius: 4,
+                tension: 0.3
+              }]
+            },
+            options: {
+              responsive: false,
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  enabled: !!sparkData.length,
+                  callbacks: {
+                    title: ctx => sparkLabels[ctx[0].dataIndex],
+                    label: ctx => `${formatPrice(ctx.raw, vs)}`
+                  }
+                }
+              },
+              scales: { x: { display: false }, y: { display: false } }
+            }
+          });
+
+          card.addEventListener('click', async e => {
+            if (e.target.closest('.watch-toggle, .alert-input')) return;
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+              <div class="modal-content">
+                <button class="modal-close">Fermer</button>
+                <h2>${c.name} - Graphique détaillé</h2>
+                <canvas id="detailedChart" width="560" height="300"></canvas>
+              </div>
+            `;
+            document.body.appendChild(modal);
+
+            const res = await fetchWithRetry(
+              `https://api.coingecko.com/api/v3/coins/${c.id}/market_chart?vs_currency=${vs}&days=7`
+            );
+            const prices = res.prices || [];
+            const detailedLabels = prices.map(p => new Date(p[0]).toLocaleString());
+            const detailedData = prices.map(p => p[1]);
+
+            const ctx = modal.querySelector('#detailedChart').getContext('2d');
+            new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: detailedLabels,
+                datasets: [{
+                  data: detailedData,
+                  borderColor: '#60a5fa',
+                  borderWidth: 2,
+                  fill: false,
+                  pointRadius: 0,
+                  tension: 0.3
+                }]
+              },
+              options: {
+                responsive: true,
+                plugins: {
+                  legend: { display: false },
+                  tooltip: {
+                    callbacks: {
+                      title: ctx => detailedLabels[ctx[0].dataIndex],
+                      label: ctx => `${formatPrice(ctx.raw, vs)}`
+                    }
+                  }
+                },
+                scales: {
+                  x: { ticks: { maxTicksLimit: 10 } },
+                  y: { beginAtZero: false }
+                }
+              }
+            });
+
+            modal.querySelector('.modal-close').addEventListener('click', () => modal.remove());
+          });
+        });
+
+        renderTradingBotModule(filtered);
+      }
+
+      function formatPrice(p, cur) {
+        if (p == null) return "—";
+        if (["usd", "eur"].includes(cur))
+          return new Intl.NumberFormat(undefined, { style: "currency", currency: cur.toUpperCase(), maximumFractionDigits: 8 }).format(p);
+        return p.toLocaleString(undefined, { maximumFractionDigits: 8 });
+      }
+
+      function exportWatchlist() {
+        const data = JSON.stringify(watchlist);
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'watchlist.json';
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function importWatchlist(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async ev => {
+          try {
+            watchlist = JSON.parse(ev.target.result);
+            localStorage.setItem("watchlist", JSON.stringify(watchlist));
+            await fetchData();
+          } catch (err) {
+            els.status.textContent = "Erreur lors de l'importation";
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      els.refreshBtn.addEventListener("click", fetchData);
+      els.toggleBtn.addEventListener("click", () => {
+        auto = !auto;
+        els.toggleBtn.textContent = auto ? "Arrêter auto" : "Relancer auto";
+        if (auto) startAuto(); else stopAuto();
+      });
+      els.themeToggle.addEventListener("click", () => {
+        theme = theme === "dark" ? "light" : "dark";
+        document.body.classList.toggle("light");
+        localStorage.setItem("theme", theme);
+      });
+      els.exportWatchlist.addEventListener("click", exportWatchlist);
+      els.importWatchlist.addEventListener("change", importWatchlist);
+      els.searchBtn.addEventListener("click", render);
+      els.clearSearchBtn.addEventListener("click", () => {
+        els.search.value = "";
+        render();
+      });
+      els.search.addEventListener("keydown", e => {
+        if (e.key === "Enter") render();
+      });
+      els.search.addEventListener("input", debounce(updateSuggestions, 300));
+      els.period.addEventListener("change", () => {
+        els.customPeriod.style.display = els.period.value === "custom" ? "block" : "none";
+        fetchData();
+      });
+      [els.count, els.currency, els.sortMode, els.showOnlyFavorites, els.showPrice, els.showChange, els.showMarketCap, els.showVolume, els.showVolatility, els.customDate].forEach(e => e.addEventListener("change", () => {
+        fetchData();
+      }));
+
+      await fetchData();
+      startAuto();
+    })();
+  </script>
+</body>
+</html>
